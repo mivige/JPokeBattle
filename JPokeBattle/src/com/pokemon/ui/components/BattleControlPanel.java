@@ -5,6 +5,7 @@ import java.awt.*;
 import com.pokemon.core.battle.Battle;
 import com.pokemon.core.moves.Move;
 import com.pokemon.ui.screens.BattleScreen;
+import com.pokemon.core.pokemon.Pokemon;
 import java.util.List;
 
 public class BattleControlPanel extends JPanel {
@@ -86,11 +87,36 @@ public class BattleControlPanel extends JPanel {
     }
     
     private void handlePokemonSwitch() {
-        // To be implemented later
-        JOptionPane.showMessageDialog(this, 
-            "Pokemon switching will be implemented later!", 
-            "Not Implemented", 
-            JOptionPane.INFORMATION_MESSAGE);
+        if (isExecutingMove) return;
+        
+        PokemonSelectionDialog dialog = new PokemonSelectionDialog(battleScreen, battle, true);
+        
+        Pokemon newPokemon = dialog.getSelectedPokemon();
+        if (newPokemon != null) {
+            isExecutingMove = true;
+            setButtonsEnabled(false);
+            
+            battleLog.queueMessage(battle.getPlayer1Pokemon().getName() + ", come back!");
+            battle.switchPlayerPokemon(newPokemon);
+            battleScreen.updatePokemonInfo(newPokemon, true);
+            battleLog.queueMessage("Go, " + newPokemon.getName() + "!");
+            
+            // Enemy turn after switch
+            Timer enemyTimer = new Timer(4500, e -> {
+                battle.executeEnemyTurn();
+                battleScreen.updateScreen();
+                
+                if (!battle.isBattleOver()) {
+                    isExecutingMove = false;
+                    setButtonsEnabled(true);
+                } else {
+                    handleBattleEnd();
+                }
+                ((Timer)e.getSource()).stop();
+            });
+            enemyTimer.setRepeats(false);
+            enemyTimer.start();
+        }
     }
 
     private void setButtonsEnabled(boolean enabled) {

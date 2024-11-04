@@ -2,8 +2,13 @@ package com.pokemon.ui.screens;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Random;
 import com.pokemon.core.battle.Battle;
 import com.pokemon.core.pokemon.Bulbo;
+import com.pokemon.core.pokemon.Carmine;
+import com.pokemon.core.pokemon.Michelangelo;
+import com.pokemon.core.pokemon.Pokemon;
+import com.pokemon.ui.components.PokemonSelectionDialog;
 
 public class StartScreen extends JFrame {
     private JPanel mainPanel;
@@ -42,12 +47,23 @@ public class StartScreen extends JFrame {
     }
     
     private void startBattle() {
-        Bulbo pokemon1 = new Bulbo(5);
-        Bulbo pokemon2 = new Bulbo(5);
-        Battle battle = new Battle(pokemon1, pokemon2);
+        PokemonSelectionDialog dialog = new PokemonSelectionDialog(this, null, true);
+        dialog.setVisible(true);
         
-        BattleScreen battleScreen = new BattleScreen(battle, this);
-        battleScreen.setVisible(true);
-        this.setVisible(false);
+        Pokemon playerPokemon = dialog.getSelectedPokemon();
+        if (playerPokemon != null) {
+            // Randomly select enemy Pokemon
+            Pokemon[] possibleEnemies = {
+                new Bulbo(5),
+                new Carmine(5),
+                new Michelangelo(5)
+            };
+            Pokemon enemyPokemon = possibleEnemies[new Random().nextInt(possibleEnemies.length)];
+            
+            Battle battle = new Battle(playerPokemon, enemyPokemon);
+            BattleScreen battleScreen = new BattleScreen(battle, this);
+            battleScreen.setVisible(true);
+            this.setVisible(false);
+        }
     }
 } 

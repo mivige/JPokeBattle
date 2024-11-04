@@ -3,6 +3,7 @@ package com.pokemon.ui.screens;
 import javax.swing.*;
 import java.awt.*;
 import com.pokemon.core.battle.Battle;
+import com.pokemon.core.pokemon.Pokemon;
 import com.pokemon.ui.components.PokemonInfoPanel;
 import com.pokemon.ui.components.BattleControlPanel;
 
@@ -57,5 +58,14 @@ public class BattleScreen extends JFrame {
         BattleEndScreen endScreen = new BattleEndScreen(playerWon, startScreen);
         endScreen.setVisible(true);
         this.dispose();
+    }
+
+    public void updatePokemonInfo(Pokemon newPokemon, boolean isPlayer1) {
+        if (isPlayer1) {
+            player1Info.setPokemon(newPokemon);
+        } else {
+            player2Info.setPokemon(newPokemon);
+        }
+        updateScreen();
     }
 }

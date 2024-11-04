@@ -84,4 +84,15 @@ public abstract class Pokemon {
             stats.getSpeed()
         );
     }
+
+    public void reduceDefense() {
+        stats = new Stats(
+            stats.getHP(),
+            stats.getAttack(),
+            (int)(stats.getDefense() * 0.85), // Reduce defense by 15%
+            stats.getSpecialAttack(),
+            stats.getSpecialDefense(),
+            stats.getSpeed()
+        );
+    }
 }

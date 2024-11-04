@@ -16,6 +16,18 @@ public class PokemonInfoPanel extends JPanel {
         initializeComponents();
     }
 
+    public void setPokemon(Pokemon newPokemon) {
+        this.pokemon = newPokemon;
+        updateComponents();
+    }
+
+    private void updateComponents() {
+        nameLabel.setText(pokemon.getName() + " Lv." + pokemon.getLevel());
+        hpLabel.setText("HP: " + pokemon.getCurrentHP() + "/" + pokemon.getStats().getHP());
+        hpBar.setMaximum(pokemon.getStats().getHP());
+        hpBar.setValue(pokemon.getCurrentHP());
+    }
+
     private void initializeComponents() {
         nameLabel = new JLabel(pokemon.getName() + " Lv." + pokemon.getLevel());
         hpLabel = new JLabel("HP: " + pokemon.getCurrentHP() + "/" + pokemon.getStats().getHP());
