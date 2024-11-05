@@ -7,6 +7,7 @@ import com.pokemon.core.moves.Move;
 import com.pokemon.ui.screens.BattleScreen;
 import com.pokemon.core.pokemon.Pokemon;
 import java.util.List;
+import com.pokemon.utils.FontManager;
 
 public class BattleControlPanel extends JPanel {
     private Battle battle;
@@ -34,6 +35,7 @@ public class BattleControlPanel extends JPanel {
         for (int i = 0; i < 4; i++) {
             final int moveIndex = i;
             moveButtons[i] = new JButton();
+            moveButtons[i].setFont(FontManager.getPokemonFont(12));
             moveButtons[i].setEnabled(false);
             moveButtons[i].addActionListener(e -> executeMove(moveIndex));
             movesPanel.add(moveButtons[i]);
@@ -41,6 +43,7 @@ public class BattleControlPanel extends JPanel {
         
         // Switch button
         switchButton = new JButton("Switch Pokemon");
+        switchButton.setFont(FontManager.getPokemonFont(12));
         switchButton.addActionListener(e -> handlePokemonSwitch());
         
         // Battle log panel
@@ -101,6 +104,9 @@ public class BattleControlPanel extends JPanel {
             battleScreen.updatePokemonInfo(newPokemon, true);
             battleLog.queueMessage("Go, " + newPokemon.getName() + "!");
             
+            // Update move buttons immediately after switch
+            updateControls();
+            
             // Enemy turn after switch
             Timer enemyTimer = new Timer(4500, e -> {
                 battle.executeEnemyTurn();
@@ -109,6 +115,7 @@ public class BattleControlPanel extends JPanel {
                 if (!battle.isBattleOver()) {
                     isExecutingMove = false;
                     setButtonsEnabled(true);
+                    updateControls();  // Update controls again after enemy turn
                 } else {
                     handleBattleEnd();
                 }
@@ -143,8 +150,6 @@ public class BattleControlPanel extends JPanel {
     }
 
     public void updateControls() {
-        if (isExecutingMove) return;
-        
         List<Move> pokemonMoves = battle.getPlayer1Pokemon().getMoves();
         for (int i = 0; i < moveButtons.length; i++) {
             if (i < pokemonMoves.size()) {

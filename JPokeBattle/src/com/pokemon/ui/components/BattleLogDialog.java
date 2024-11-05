@@ -1,7 +1,7 @@
 package com.pokemon.ui.components;
 
 import javax.swing.*;
-import java.awt.*;
+//import java.awt.*;
 
 public class BattleLogDialog extends JDialog {
     private JTextArea logArea;

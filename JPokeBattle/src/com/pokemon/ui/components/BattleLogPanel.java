@@ -5,6 +5,7 @@ import java.awt.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.Queue;
 import java.util.LinkedList;
+import com.pokemon.utils.FontManager;
 
 public class BattleLogPanel extends JPanel {
     private JLabel messageLabel;
@@ -21,7 +22,7 @@ public class BattleLogPanel extends JPanel {
         
         messageLabel = new JLabel();
         messageLabel.setHorizontalAlignment(JLabel.LEFT);
-        messageLabel.setFont(new Font("SansSerif", Font.PLAIN, 16));
+        messageLabel.setFont(FontManager.getPokemonFont(16));
         add(messageLabel, BorderLayout.CENTER);
         
         messageQueue = new LinkedList<>();

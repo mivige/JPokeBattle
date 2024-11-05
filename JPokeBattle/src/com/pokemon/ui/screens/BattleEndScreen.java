@@ -2,6 +2,7 @@ package com.pokemon.ui.screens;
 
 import javax.swing.*;
 import java.awt.*;
+import com.pokemon.utils.FontManager;
 
 public class BattleEndScreen extends JFrame {
     private StartScreen startScreen;
@@ -23,7 +24,7 @@ public class BattleEndScreen extends JFrame {
         // Result Message
         String resultText = isVictory ? "Victory!" : "Defeat...";
         JLabel resultLabel = new JLabel(resultText);
-        resultLabel.setFont(new Font("SansSerif", Font.BOLD, 48));
+        resultLabel.setFont(FontManager.getPokemonFont(48));
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.insets = new Insets(0, 0, 50, 0);
@@ -31,7 +32,7 @@ public class BattleEndScreen extends JFrame {
         
         // Return to Main Menu Button
         JButton returnButton = new JButton("Return to Main Menu");
-        returnButton.setFont(new Font("SansSerif", Font.PLAIN, 24));
+        returnButton.setFont(FontManager.getPokemonFont(24));
         returnButton.setPreferredSize(new Dimension(250, 50));
         returnButton.addActionListener(e -> returnToMainMenu());
         

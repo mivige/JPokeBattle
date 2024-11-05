@@ -4,7 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import com.pokemon.core.pokemon.*;
 import com.pokemon.core.battle.Battle;
-import java.util.List;
+import com.pokemon.utils.FontManager;
+//import java.util.List;
 
 public class PokemonSelectionDialog extends JDialog {
     private Pokemon selectedPokemon;
@@ -28,7 +29,7 @@ public class PokemonSelectionDialog extends JDialog {
         
         // Title
         JLabel titleLabel = new JLabel("Choose your Pokemon");
-        titleLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
+        titleLabel.setFont(FontManager.getPokemonFont(16));
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.gridwidth = 3;
@@ -50,8 +51,14 @@ public class PokemonSelectionDialog extends JDialog {
             
             // Create a panel for Pokemon info using stored Pokemon state
             JPanel infoPanel = new JPanel(new GridLayout(2, 1));
-            infoPanel.add(new JLabel(storedPokemon.getName()));
-            infoPanel.add(new JLabel("HP: " + storedPokemon.getCurrentHP() + "/" + storedPokemon.getStats().getHP()));
+            JLabel nameLabel = new JLabel(storedPokemon.getName());
+            JLabel hpLabel = new JLabel("HP: " + storedPokemon.getCurrentHP() + "/" + storedPokemon.getStats().getHP());
+            
+            nameLabel.setFont(FontManager.getPokemonFont(12));
+            hpLabel.setFont(FontManager.getPokemonFont(12));
+            
+            infoPanel.add(nameLabel);
+            infoPanel.add(hpLabel);
             
             button.add(infoPanel, BorderLayout.CENTER);
             button.setPreferredSize(new Dimension(150, 60));
