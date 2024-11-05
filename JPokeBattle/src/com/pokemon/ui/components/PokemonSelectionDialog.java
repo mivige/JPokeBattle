@@ -10,9 +10,9 @@ import com.pokemon.utils.FontManager;
 public class PokemonSelectionDialog extends JDialog {
     private Pokemon selectedPokemon;
     private Pokemon[] availablePokemon = {
-        new Bulbo(5),
-        new Carmine(5),
-        new Michelangelo(5)
+        new Bulbo(1),
+        new Carmine(1),
+        new Michelangelo(1)
     };
     private Battle battle;
 

@@ -12,14 +12,18 @@ public abstract class Pokemon {
     private List<Move> moves;
     private int currentHP;
     private PokemonType type;
+    private int currentXP;
+    private final int baseXP;
     
-    public Pokemon(String name, int level, Stats baseStats, PokemonType type) {
+    public Pokemon(String name, int level, Stats baseStats, PokemonType type, int baseXP) {
         this.name = name;
         this.level = level;
         this.stats = baseStats;
         this.moves = new ArrayList<>();
         this.currentHP = stats.getHP();
         this.type = type;
+        this.currentXP = 0;
+        this.baseXP = baseXP;
         initializeDefaultMoves();
     }
     
@@ -51,6 +55,9 @@ public abstract class Pokemon {
     }
     public PokemonType getType() {
         return type;
+    }
+    public int getBaseXP() {
+        return baseXP;
     }
     
     public boolean learnMove(Move newMove) {
@@ -94,5 +101,34 @@ public abstract class Pokemon {
             stats.getSpecialDefense(),
             stats.getSpeed()
         );
+    }
+
+    public void levelUp() {
+        this.level++;
+        // Increase all stats by 1/50 (2%)
+        stats = new Stats(
+            (int)(stats.getHP() * 1.02),
+            (int)(stats.getAttack() * 1.02),
+            (int)(stats.getDefense() * 1.02),
+            (int)(stats.getSpecialAttack() * 1.02),
+            (int)(stats.getSpecialDefense() * 1.02),
+            (int)(stats.getSpeed() * 1.02)
+        );
+        // Heal Pokemon to full HP after level up
+        this.currentHP = stats.getHP();
+    }
+
+    public void gainXP(int amount) {
+        currentXP += amount;
+        checkLevelUp();
+    }
+
+    protected abstract int getXPToNextLevel();
+
+    private void checkLevelUp() {
+        while (currentXP >= getXPToNextLevel()) {
+            currentXP -= getXPToNextLevel();
+            levelUp();
+        }
     }
 }

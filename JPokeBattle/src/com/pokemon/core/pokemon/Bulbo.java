@@ -8,12 +8,18 @@ public class Bulbo extends Pokemon {
     private static final Stats BASE_STATS = new Stats(45, 49, 49, 65, 65, 45);
     
     public Bulbo(int level) {
-        super("Bulbo", level, BASE_STATS, PokemonType.GRASS);
+        super("Bulbo", level, BASE_STATS, PokemonType.GRASS, 64);
     }
     
     @Override
     protected void initializeDefaultMoves() {
         addMove(new Tackle());
         addMove(new Growl());
+    }
+    
+    @Override
+    protected int getXPToNextLevel() {
+        // Medium slow experience group
+        return (int)((6/5) * Math.pow(getLevel(), 3) - 15 * Math.pow(getLevel(), 2) + (100 * getLevel()) - 140);
     }
 }

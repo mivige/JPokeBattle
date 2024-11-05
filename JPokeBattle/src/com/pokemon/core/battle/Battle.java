@@ -122,4 +122,13 @@ public class Battle {
         String pokemonKey = getPokemonKey(pokemon);
         return playerPokemonStorage.get(pokemonKey);
     }
+    
+    public void handleBattleEnd() {
+        if (player1Pokemon.getCurrentHP() > 0) {
+            // Calculate XP based on enemy's level and baseXP
+            int xpGained = (player2Pokemon.getLevel() * player1Pokemon.getBaseXP()) / 7;
+            player1Pokemon.gainXP(xpGained);
+            logBattle(player1Pokemon.getName() + " gained " + xpGained + " XP!");
+        }
+    }
 }

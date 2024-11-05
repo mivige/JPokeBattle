@@ -113,9 +113,9 @@ public class StartScreen extends JFrame {
         Pokemon playerPokemon = dialog.getSelectedPokemon();
         if (playerPokemon != null) {
             Pokemon[] possibleEnemies = {
-                new Bulbo(5),
-                new Carmine(5),
-                new Michelangelo(5)
+                new Bulbo(1),
+                new Carmine(1),
+                new Michelangelo(1)
             };
             Pokemon enemyPokemon = possibleEnemies[new Random().nextInt(possibleEnemies.length)];
             
