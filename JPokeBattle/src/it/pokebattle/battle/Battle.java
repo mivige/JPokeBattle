@@ -28,6 +28,7 @@ public class Battle {
     private Random random; // Generatore di numeri casuali
     private boolean battleEnded; // Flag che indica se la battaglia è terminata
     private boolean playerWon; // Flag che indica se il giocatore ha vinto
+    private AIStrategy enemyAIStrategy;
     
     /**
      * Costruttore per una battaglia tra due squadre di Pokémon
@@ -48,6 +49,14 @@ public class Battle {
         this.random = new Random();
         this.battleEnded = false;
         this.playerWon = false;
+        // Scegli la strategia IA in base alle consecutive wins
+        int wins = GameState.getInstance().getConsecutiveWins();
+        double probMaxDamage = Math.min(0.2 + wins * 0.15, 0.95); // parte da 20%, cresce fino a 95%
+        if (Math.random() < probMaxDamage) {
+            this.enemyAIStrategy = new AIMaxDamageStrategy();
+        } else {
+            this.enemyAIStrategy = new AIRandomStrategy();
+        }
     }
     
     /**
@@ -88,10 +97,29 @@ public class Battle {
         
         Move playerMove = playerPokemon.getMoves().get(moveIndex);
         
-        // Scelta casuale della mossa dell'avversario
-        List<Move> enemyMoves = enemyPokemon.getMoves();
-        Move enemyMove = enemyMoves.get(random.nextInt(enemyMoves.size()));
-        
+        int switchIndex = enemyAIStrategy.chooseSwitch(enemyPokemon, playerPokemon, enemyTeam);
+        if (switchIndex != -1) {
+            Pokemon oldPokemon = enemyPokemon;
+            enemyPokemon = enemyTeam.get(switchIndex);
+            for (BattleListener listener : listeners) {
+                listener.onPokemonSwitched(oldPokemon, enemyPokemon, false);
+            }
+            // Dopo il cambio, il giocatore esegue comunque la sua mossa sul nuovo Pokémon avversario
+            executeMove(playerPokemon, enemyPokemon, playerMove, true);
+
+            // L'avversario ha cambiato Pokémon, il turno finisce qui
+            checkBattleEnd();
+            return !battleEnded;
+        }
+
+        // Sceglie una mossa dell'avversario
+        List<Move> availableMoves = new ArrayList<>();
+        for (Move m : enemyPokemon.getMoves()) {
+            if (m.getCurrentPp() > 0) availableMoves.add(m);
+        }
+        int enemyMoveIndex = enemyAIStrategy.chooseMove(enemyPokemon, playerPokemon, availableMoves);
+        Move enemyMove = availableMoves.get(enemyMoveIndex);
+
         // Determina chi attacca per primo in base alla velocità e alla priorità delle mosse
         boolean playerFirst = determineFirstAttacker(playerPokemon, enemyPokemon, playerMove, enemyMove);
         

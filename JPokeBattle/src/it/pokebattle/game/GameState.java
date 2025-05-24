@@ -153,12 +153,9 @@ public class GameState implements Serializable {
      * @return true se il Pokémon è stato aggiunto, false se la squadra è piena
      */
     public boolean addPokemonToTeam(Pokemon pokemon) {
-        if (playerTeam.size() < 6) { // Massimo 6 Pokémon nella squadra
-            playerTeam.add(pokemon);
-            saveGame();
-            return true;
-        }
-        return false;
+        playerTeam.add(pokemon);
+        saveGame();
+        return true;
     }
     
     /**

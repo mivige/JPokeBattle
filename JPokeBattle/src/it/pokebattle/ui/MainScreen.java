@@ -113,6 +113,7 @@ public class MainScreen extends JFrame {
         leaderboardButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                initLeaderboardScreen();
                 cardLayout.show(mainPanel, SCREEN_LEADERBOARD);
             }
         });
@@ -260,26 +261,38 @@ public class MainScreen extends JFrame {
     private void initLeaderboardScreen() {
         JPanel leaderboardScreen = new JPanel(new BorderLayout());
         leaderboardScreen.setBorder(BorderFactory.createEmptyBorder(50, 50, 50, 50));
-        
+
         // Titolo
         JLabel titleLabel = new JLabel("Classifica");
         titleLabel.setFont(FontManager.getPokemonFont(48));
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
         leaderboardScreen.add(titleLabel, BorderLayout.NORTH);
-        
-        // Contenuto della classifica (da aggiornare dinamicamente)
-        JPanel leaderboardPanel = new JPanel(new GridLayout(11, 2));
-        leaderboardPanel.add(new JLabel("Posizione"));
-        leaderboardPanel.add(new JLabel("Giocatore"));
-        leaderboardPanel.add(new JLabel("Punteggio"));
-        
-        // Qui andrebbe aggiunto il codice per visualizzare la classifica
-        
-        leaderboardScreen.add(leaderboardPanel, BorderLayout.CENTER);
-        
+
+        // Ottieni e ordina la leaderboard
+        java.util.Map<String, Integer> leaderboard = GameState.getInstance().getLeaderboard();
+        java.util.List<java.util.Map.Entry<String, Integer>> entries = new java.util.ArrayList<>(leaderboard.entrySet());
+        entries.sort((a, b) -> b.getValue().compareTo(a.getValue()));
+
+        // Prepara i dati per la tabella
+        String[] columnNames = {"Posizione", "Giocatore", "Punteggio"};
+        String[][] data = new String[Math.min(10, entries.size())][3];
+        for (int i = 0; i < data.length; i++) {
+            data[i][0] = String.valueOf(i + 1);
+            data[i][1] = entries.get(i).getKey();
+            data[i][2] = String.valueOf(entries.get(i).getValue());
+        }
+
+        javax.swing.JTable table = new javax.swing.JTable(data, columnNames);
+        table.setEnabled(false);
+        table.setFont(FontManager.getPokemonFont(18));
+        table.getTableHeader().setFont(FontManager.getPokemonFont(20));
+        table.setRowHeight(28);
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        leaderboardScreen.add(scrollPane, BorderLayout.CENTER);
+
         // Pulsante per tornare al menu principale
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        
         JButton backButton = new JButton("Indietro");
         backButton.setFont(FontManager.getPokemonFont(24));
         backButton.addActionListener(new ActionListener() {
@@ -288,11 +301,10 @@ public class MainScreen extends JFrame {
                 cardLayout.show(mainPanel, SCREEN_START);
             }
         });
-        
         buttonPanel.add(backButton);
-        
+
         leaderboardScreen.add(buttonPanel, BorderLayout.SOUTH);
-        
+
         mainPanel.add(leaderboardScreen, SCREEN_LEADERBOARD);
     }
     
@@ -681,19 +693,28 @@ public class MainScreen extends JFrame {
      * @param checkLeaderboard true se deve controllare se il punteggio entra in classifica
      */
     public void showGameOverScreen(boolean checkLeaderboard) {
-        // Controlla se il punteggio entra in classifica
         if (checkLeaderboard && GameState.getInstance().getConsecutiveWins() > 0) {
-            String playerName = JOptionPane.showInputDialog(this,
-                    "Hai ottenuto " + GameState.getInstance().getConsecutiveWins() + " vittorie consecutive!\n" +
-                    "Inserisci il tuo nome per la classifica:",
-                    "Nuovo Record",
-                    JOptionPane.PLAIN_MESSAGE);
-            
-            if (playerName != null && !playerName.trim().isEmpty()) {
-                GameState.getInstance().addToLeaderboard(playerName, GameState.getInstance().getConsecutiveWins());
+            int score = GameState.getInstance().getConsecutiveWins();
+            // Ottieni la leaderboard attuale
+            java.util.Map<String, Integer> leaderboard = GameState.getInstance().getLeaderboard();
+            // Crea una lista ordinata dei punteggi
+            java.util.List<Integer> scores = new java.util.ArrayList<>(leaderboard.values());
+            scores.sort(java.util.Collections.reverseOrder());
+
+            boolean isNewRecord = scores.size() < 10 || score > scores.get(scores.size() - 1);
+
+            if (isNewRecord) {
+                String playerName = JOptionPane.showInputDialog(this,
+                        "Hai ottenuto " + score + " vittorie consecutive!\n" +
+                        "Inserisci il tuo nome per la classifica:",
+                        "Nuovo Record",
+                        JOptionPane.PLAIN_MESSAGE);
+
+                if (playerName != null && !playerName.trim().isEmpty()) {
+                    GameState.getInstance().addToLeaderboard(playerName, score);
+                }
             }
         }
-        
         cardLayout.show(mainPanel, SCREEN_GAME_OVER);
     }
 }

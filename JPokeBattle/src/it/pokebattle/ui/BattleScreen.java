@@ -341,14 +341,12 @@ public class BattleScreen extends JPanel implements BattleListener {
         if (battle.isBattleEnded()) {
             if (battle.hasPlayerWon()) {
                 showAnimatedMessage("Hai vinto la battaglia!");
-                // Salva lo stato del gioco e mostra la schermata di vittoria
                 GameState.getInstance().saveBattleResult(true);
                 mainScreen.showVictoryScreen();
             } else {
                 showAnimatedMessage("Hai perso la battaglia!");
-                // Salva lo stato del gioco e mostra la schermata di game over
-                GameState.getInstance().saveBattleResult(false);
                 mainScreen.showGameOverScreen(true);
+                GameState.getInstance().saveBattleResult(false);
             }
         } else {
             showAnimatedMessage("Cosa farà " + battle.getPlayerPokemon().getName() + "?");

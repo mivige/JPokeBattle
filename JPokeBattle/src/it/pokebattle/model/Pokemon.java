@@ -372,6 +372,22 @@ public class Pokemon implements Serializable {
         }
     }
 
+    public int getBaseAttack() { 
+        return baseAttack; 
+    }
+
+    public int getBaseDefense() { 
+        return baseDefense; 
+    }
+
+    public int getBaseSpecial() { 
+        return baseSpecial; 
+    }
+   
+    public int getBaseSpeed() { 
+        return baseSpeed; 
+    }
+
     // Metodo di evoluzione
     public void evolve() {
         if (canEvolve()) {
