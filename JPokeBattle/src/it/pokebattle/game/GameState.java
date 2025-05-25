@@ -14,6 +14,7 @@ import java.util.Map;
 import it.pokebattle.battle.Battle;
 import it.pokebattle.model.Pokemon;
 import it.pokebattle.model.PokemonFactory;
+import it.pokebattle.model.Move;
 
 /**
  * Classe che gestisce lo stato del gioco, inclusi i Pokémon del giocatore,
@@ -75,7 +76,6 @@ public class GameState implements Serializable {
     public void startNewGame(String starterSpecies) {
         // Salva la lista dei Pokémon sbloccati prima di resettare
         List<Pokemon> oldTeam = new ArrayList<>(playerTeam);
-        int oldActiveIndex = activePokemonIndex; // Salva l'indice attivo precedente
 
         // Resetta la squadra del giocatore
         playerTeam.clear();
@@ -96,6 +96,9 @@ public class GameState implements Serializable {
                 poke.setExperience(found.getExperience());
                 poke.setCurrentHp(poke.getMaxHp());
                 poke.setFainted(false);
+
+                // Copia le mosse personalizzate
+                poke.setMoves(found.getMoves());
             } else {
                 // Nuovo Pokémon base
                 poke = PokemonFactory.createPokemon(species, 5);
@@ -106,12 +109,12 @@ public class GameState implements Serializable {
         // Resetta le statistiche
         consecutiveWins = 0;
 
-        // Assicurati che i Pokémon iniziali siano sempre sbloccati
+        // Assicura che i Pokémon iniziali siano sempre sbloccati
         if (!unlockedSpecies.contains("Bulbasaur")) unlockedSpecies.add("Bulbasaur");
         if (!unlockedSpecies.contains("Charmander")) unlockedSpecies.add("Charmander");
         if (!unlockedSpecies.contains("Squirtle")) unlockedSpecies.add("Squirtle");
 
-        // Se si tratta di una nuova partita (starter scelto), metti lo starter in prima posizione e attivo
+        // Se si tratta di una nuova partita (starter scelto), starter in prima posizione e attivo
         int starterIndex = -1;
         for (int i = 0; i < playerTeam.size(); i++) {
             if (playerTeam.get(i).getSpecies().equals(starterSpecies)) {
@@ -120,6 +123,7 @@ public class GameState implements Serializable {
             }
         }
         if (starterIndex > 0) {
+            // Sposta il Pokémon starter in prima posizione
             Pokemon starter = playerTeam.remove(starterIndex);
             playerTeam.add(0, starter);
             activePokemonIndex = 0;

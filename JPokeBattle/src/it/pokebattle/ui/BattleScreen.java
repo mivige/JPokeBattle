@@ -20,6 +20,8 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
+import javax.swing.ImageIcon;
+import java.io.File;
 
 import it.pokebattle.battle.Battle;
 import it.pokebattle.battle.BattleListener;
@@ -68,6 +70,9 @@ public class BattleScreen extends JPanel implements BattleListener {
     private Queue<String> messageQueue = new LinkedList<>();
     private boolean isMessageShowing = false;
 
+    private JLabel enemyPokemonImageLabel;
+    private JLabel playerPokemonImageLabel;
+
     /**
      * Costruttore della schermata di battaglia
      * 
@@ -88,11 +93,10 @@ public class BattleScreen extends JPanel implements BattleListener {
      * Inizializza i componenti dell'interfaccia
      */
     private void initComponents() {
-        // Panel del campo di battaglia
-        battleFieldPanel = new JPanel(new GridLayout(2, 1, 10, 10));
+        battleFieldPanel = new JPanel(new GridLayout(2, 2, 10, 10));
         battleFieldPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        
-        // Panel del Pokémon nemico
+
+        // Panel del Pokémon nemico (info)
         enemyPokemonPanel = new JPanel(new BorderLayout());
         JPanel enemyInfoPanel = new JPanel(new GridLayout(3, 1));
         
@@ -100,7 +104,7 @@ public class BattleScreen extends JPanel implements BattleListener {
         enemyPokemonNameLabel.setFont(FontManager.getPokemonFont(16));
         
         enemyPokemonLevelLabel = new JLabel();
-        enemyPokemonLevelLabel.setFont(FontManager.getPokemonFont(14));
+        enemyPokemonLevelLabel.setFont(FontManager.getPokemonFont(12));
         
         enemyPokemonHpBar = new JProgressBar(0, 100);
         enemyPokemonHpBar.setForeground(Color.GREEN);
@@ -119,7 +123,11 @@ public class BattleScreen extends JPanel implements BattleListener {
         enemyInfoPanel.add(enemyHpPanel);
         enemyPokemonPanel.add(enemyInfoPanel, BorderLayout.CENTER);
         
-        // Panel del Pokémon del giocatore
+        // Immagine Pokémon nemico
+        enemyPokemonImageLabel = new JLabel();
+        enemyPokemonImageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        // Panel del Pokémon del giocatore (info)
         playerPokemonPanel = new JPanel(new BorderLayout());
         JPanel playerInfoPanel = new JPanel(new GridLayout(3, 1));
         
@@ -127,7 +135,7 @@ public class BattleScreen extends JPanel implements BattleListener {
         playerPokemonNameLabel.setFont(FontManager.getPokemonFont(16));
         
         playerPokemonLevelLabel = new JLabel();
-        playerPokemonLevelLabel.setFont(FontManager.getPokemonFont(14));
+        playerPokemonLevelLabel.setFont(FontManager.getPokemonFont(12));
         
         playerPokemonHpBar = new JProgressBar(0, 100);
         playerPokemonHpBar.setForeground(Color.GREEN);
@@ -145,9 +153,15 @@ public class BattleScreen extends JPanel implements BattleListener {
         
         playerInfoPanel.add(playerHpPanel);
         playerPokemonPanel.add(playerInfoPanel, BorderLayout.CENTER);
-        
-        battleFieldPanel.add(enemyPokemonPanel);
-        battleFieldPanel.add(playerPokemonPanel);
+
+        // Immagine Pokémon giocatore
+        playerPokemonImageLabel = new JLabel();
+        playerPokemonImageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        battleFieldPanel.add(enemyPokemonPanel);         // (0,0) info nemico
+        battleFieldPanel.add(enemyPokemonImageLabel);    // (0,1) immagine nemico
+        battleFieldPanel.add(playerPokemonImageLabel);   // (1,0) immagine giocatore
+        battleFieldPanel.add(playerPokemonPanel);        // (1,1) info giocatore
         
         // Panel dei messaggi
         messagePanel = new JPanel(new BorderLayout());
@@ -228,11 +242,9 @@ public class BattleScreen extends JPanel implements BattleListener {
             }
         });
         
-        // Crea un pannello separato per il pulsante "INDIETRO"
         JPanel backPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         backPanel.add(backButton);
         
-        // Aggiungi i pannelli al card delle mosse
         JPanel movesWithBackPanel = new JPanel(new BorderLayout());
         movesWithBackPanel.add(movePanel, BorderLayout.CENTER);
         movesWithBackPanel.add(backPanel, BorderLayout.SOUTH);
@@ -265,7 +277,7 @@ public class BattleScreen extends JPanel implements BattleListener {
             "HP: " + playerPokemon.getCurrentHp() + "/" + playerPokemon.getMaxHp() +
             "   EXP: " + playerPokemon.getExperience() + "/" + playerPokemon.getExperienceToNextLevel()
         );
-        playerPokemonHpLabel.setText(""); // Non mostrare nulla qui, la barra HP è già visibile
+        playerPokemonHpLabel.setText("");
 
         int playerHpPercentage = (int) ((double) playerPokemon.getCurrentHp() / playerPokemon.getMaxHp() * 100);
         playerPokemonHpBar.setValue(playerHpPercentage);
@@ -279,13 +291,13 @@ public class BattleScreen extends JPanel implements BattleListener {
             playerPokemonHpBar.setForeground(Color.GREEN);
         }
 
-        // Nemico: livello accanto al nome tra parentesi
+        // Nemico
         enemyPokemonNameLabel.setText(enemyPokemon.getName() + " (Lv. " + enemyPokemon.getLevel() + ")");
         // Mostra solo HP nella riga sottostante (EXP non visibile per il nemico)
         enemyPokemonLevelLabel.setText(
             "HP: " + enemyPokemon.getCurrentHp() + "/" + enemyPokemon.getMaxHp()
         );
-        enemyPokemonHpLabel.setText(""); // Non mostrare nulla qui
+        enemyPokemonHpLabel.setText("");
 
         int enemyHpPercentage = (int) ((double) enemyPokemon.getCurrentHp() / enemyPokemon.getMaxHp() * 100);
         enemyPokemonHpBar.setValue(enemyHpPercentage);
@@ -315,6 +327,10 @@ public class BattleScreen extends JPanel implements BattleListener {
         // Disabilita i pulsanti se la battaglia è terminata
         switchButton.setEnabled(!battle.isBattleEnded());
         runButton.setEnabled(!battle.isBattleEnded());
+
+        // Aggiorna immagini
+        setPokemonImage(enemyPokemonImageLabel, enemyPokemon.getSpecies());
+        setPokemonImage(playerPokemonImageLabel, playerPokemon.getSpecies());
     }
     
     /**
@@ -383,7 +399,7 @@ public class BattleScreen extends JPanel implements BattleListener {
         fullMessage = messageQueue.poll();
         messageCharIndex = 0;
         messageLabel.setText("");
-        int delay = 25; // ms per carattere (~40 caratteri/sec, regolabile)
+        int delay = 25; // ms per carattere
         messageTimer = new Timer(delay, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -407,6 +423,33 @@ public class BattleScreen extends JPanel implements BattleListener {
         messageTimer.start();
     }
     
+    /**
+     * Imposta l'immagine del Pokémon nella label, se disponibile e la ridimensiona
+     * all'altezza massima della riga.
+     */
+    private void setPokemonImage(JLabel label, String species) {
+        try {
+            java.net.URL url = getClass().getClassLoader().getResource("images/" + species + ".png");
+            if (url == null) {
+                label.setIcon(null);
+                return;
+            }
+            ImageIcon originalIcon = new ImageIcon(url);
+            // Calcola l'altezza massima della riga
+            int rowHeight = label.getHeight();
+            if (rowHeight <= 0) rowHeight = 128; // fallback
+            int imgWidth = originalIcon.getIconWidth();
+            int imgHeight = originalIcon.getIconHeight();
+            // Scala proporzionalmente
+            int newHeight = rowHeight;
+            int newWidth = (int) ((double) imgWidth / imgHeight * newHeight);
+            java.awt.Image scaledImage = originalIcon.getImage().getScaledInstance(newWidth, newHeight, java.awt.Image.SCALE_SMOOTH);
+            label.setIcon(new ImageIcon(scaledImage));
+        } catch (Exception e) {
+            label.setIcon(null);
+        }
+    }
+
     // Implementazione dei metodi dell'interfaccia BattleListener
     
     @Override

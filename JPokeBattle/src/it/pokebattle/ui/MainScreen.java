@@ -174,7 +174,7 @@ public class MainScreen extends JFrame {
         
         // Messaggio
         JLabel messageLabel = new JLabel("Congratulazioni! Hai sconfitto l'avversario!");
-        messageLabel.setFont(FontManager.getPokemonFont(24));
+        messageLabel.setFont(FontManager.getPokemonFont(18));
         messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
         victoryScreen.add(messageLabel, BorderLayout.CENTER);
         
@@ -222,7 +222,7 @@ public class MainScreen extends JFrame {
         
         // Messaggio
         JLabel messageLabel = new JLabel("La partita è terminata.");
-        messageLabel.setFont(FontManager.getPokemonFont(24));
+        messageLabel.setFont(FontManager.getPokemonFont(18));
         messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
         gameOverScreen.add(messageLabel, BorderLayout.CENTER);
         
@@ -507,11 +507,11 @@ public class MainScreen extends JFrame {
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
         switchScreen.add(titleLabel, BorderLayout.NORTH);
         
-        // Ottieni tutti i Pokémon disponibili al giocatore
+        // Ottiene tutti i Pokémon disponibili al giocatore
         List<Pokemon> teamPokemon = battle.getPlayerTeam();
-        // Assicurati di ottenere la lista aggiornata dei Pokémon sbloccati
+        // Assicura di ottenere la lista aggiornata dei Pokémon sbloccati
         List<String> unlockedSpecies = GameState.getInstance().getUnlockedSpecies();
-        // Assicurati che i Pokémon iniziali siano sempre disponibili
+        // Assicura che i Pokémon iniziali siano sempre disponibili
         if (!unlockedSpecies.contains("Bulbasaur")) unlockedSpecies.add("Bulbasaur");
         if (!unlockedSpecies.contains("Charmander")) unlockedSpecies.add("Charmander");
         if (!unlockedSpecies.contains("Squirtle")) unlockedSpecies.add("Squirtle");
@@ -520,7 +520,7 @@ public class MainScreen extends JFrame {
         JPanel pokemonListPanel = new JPanel();
         pokemonListPanel.setLayout(new BoxLayout(pokemonListPanel, BoxLayout.Y_AXIS));
         
-        // Aggiungi prima i Pokémon nel team attuale
+        // Aggiunge prima i Pokémon nel team attuale
         JLabel teamLabel = new JLabel("Il tuo team:");
         teamLabel.setFont(FontManager.getPokemonFont(18));
         teamLabel.setAlignmentX(JLabel.LEFT_ALIGNMENT);

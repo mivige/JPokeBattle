@@ -8,6 +8,9 @@ import java.util.List;
 public class AIMaxDamageStrategy implements AIStrategy {
     @Override
     public int chooseMove(Pokemon self, Pokemon opponent, List<Move> availableMoves) {
+        if (availableMoves.isEmpty()) {
+            return -1; // Nessuna mossa disponibile
+        }
         int bestIndex = 0;
         double bestScore = Double.NEGATIVE_INFINITY;
         int koIndex = -1;

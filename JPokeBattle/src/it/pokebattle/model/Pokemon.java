@@ -3,6 +3,7 @@ package it.pokebattle.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JOptionPane;
 
 /**
  * Classe che rappresenta un Pokémon nel gioco.
@@ -141,6 +142,10 @@ public class Pokemon implements Serializable {
      * @return true se il Pokémon è salito di livello, false altrimenti
      */
     public boolean addExperience(int exp) {
+        if (exp < 0) {
+            exp = 0; // Non aggiungere esperienza negativa
+        }
+
         this.experience += exp;
         boolean leveledUp = false;
 
@@ -166,19 +171,55 @@ public class Pokemon implements Serializable {
         this.experienceToNextLevel = calculateExperienceToNextLevel();
         calculateStats();
         this.currentHp = this.maxHp; // Ripristina HP al massimo dopo il level up
+
+        // Controlla se ci sono mosse da apprendere a questo livello
+        List<Move> newMoves = PokemonFactory.getLearnableMovesForLevel(this.species, this.level);
+        for (Move move : newMoves) {
+            this.addMove(move);
+        }
     }
     
     /**
      * Aggiunge una mossa al Pokémon
      * @param move Mossa da aggiungere
-     * @return true se la mossa è stata aggiunta, false se il Pokémon ha già 4 mosse
+     * @return true se la mossa è stata aggiunta, false se già presente o se non è possibile aggiungerla
      */
     public boolean addMove(Move move) {
+        // Non aggiungere se già presente una mossa con lo stesso nome
+        for (Move m : moves) {
+            if (m.getName().equals(move.getName())) {
+                return false;
+            }
+        }
         if (moves.size() < 4) {
             moves.add(move);
             return true;
+        } else {
+            // Chiedi al giocatore se vuole apprendere la nuova mossa
+            String[] options = new String[5];
+            for (int i = 0; i < 4; i++) {
+                options[i] = "Dimentica " + moves.get(i).getName();
+            }
+            options[4] = "Non imparare " + move.getName();
+
+            int choice = javax.swing.JOptionPane.showOptionDialog(
+                null,
+                "Vuoi che " + name + " impari la mossa " + move.getName() + "?\nScegli una mossa da dimenticare:",
+                "Nuova mossa",
+                javax.swing.JOptionPane.DEFAULT_OPTION,
+                javax.swing.JOptionPane.QUESTION_MESSAGE,
+                null,
+                options,
+                options[4]
+            );
+
+            if (choice >= 0 && choice < 4) {
+                moves.set(choice, move);
+                return true;
+            }
+            // Se l'utente sceglie "Non imparare", non cambia nulla
+            return false;
         }
-        return false;
     }
     
     /**
@@ -265,6 +306,10 @@ public class Pokemon implements Serializable {
         return level;
     }
     
+    public int getBaseHp() {
+        return baseHp;
+    }
+
     public int getCurrentHp() {
         return currentHp;
     }
@@ -388,6 +433,10 @@ public class Pokemon implements Serializable {
         return baseSpeed; 
     }
 
+    public void setMoves(List<Move> moves) {
+        this.moves = new ArrayList<>(moves);
+    }
+
     // Metodo di evoluzione
     public void evolve() {
         if (canEvolve()) {
@@ -423,6 +472,74 @@ public class Pokemon implements Serializable {
                     );
                 }
             }
+        }
+    }
+
+    public void increaseStat(Stat stat, int amount) {
+        switch (stat) {
+            case HP:
+                this.maxHp += amount;
+                this.currentHp += amount;
+                break;
+            case ATTACK:
+                this.attack += amount;
+                break;
+            case DEFENSE:
+                this.defense += amount;
+                break;
+            case SPECIAL:
+                this.special += amount;
+                break;
+            case SPEED:
+                this.speed += amount;
+                break;
+        }
+    }
+
+    public void decreaseStat(Stat stat, int amount) {
+        switch (stat) {
+            case HP:
+                this.maxHp -= amount;
+                this.currentHp -= amount;
+                if (this.maxHp < 0) {
+                    this.maxHp = 0; // Assicurati che il max HP non sia negativo
+                }
+                if (this.currentHp < 0) {
+                    this.currentHp = 0; // Assicurati che gli HP non siano negativi
+                }
+                break;
+            case ATTACK:
+                this.attack -= amount;
+                if (this.attack < 0) {
+                    this.attack = 0; // Assicurati che l'attacco non sia negativo
+                }
+                break;
+            case DEFENSE:
+                this.defense -= amount;
+                if (this.defense < 0) {
+                    this.defense = 0; // Assicurati che la difesa non sia negativa
+                }
+                break;
+            case SPECIAL:
+                this.special -= amount;
+                if (this.special < 0) {
+                    this.special = 0; // Assicurati che la speciale non sia negativa
+                }
+                break;
+            case SPEED:
+                this.speed -= amount;
+                if (this.speed < 0) {
+                    this.speed = 0; // Assicurati che la velocità non sia negativa
+                }
+                break;
+        }
+    }
+
+    public void healSomeHp() {
+        int healAmount = this.maxHp / 2;
+        this.currentHp += healAmount;
+        if (this.currentHp > this.maxHp) {
+            this.currentHp = this.maxHp;
         }
     }
 }

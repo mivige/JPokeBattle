@@ -104,7 +104,7 @@ public class TestPokemon {
             System.out.println("TestPokemon: esperienza negativa - FAILED");
         }
 
-        // Test evoluzione multipla (se supportata)
+        // Test evoluzione multipla
         total++;
         p.setEvolutionInfo("Venusaur", p.getLevel());
         p.evolve();

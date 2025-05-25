@@ -7,7 +7,7 @@ import java.util.Map;
 
 /**
  * Factory class per la creazione di Pokémon predefiniti.
- * Contiene metodi per creare i Pokémon iniziali e altri Pokémon specificati nei requisiti.
+ * Contiene metodi per creare i Pokémon con le loro statistiche base, mosse e informazioni sull'evoluzione.
  */
 public class PokemonFactory {
     // Mappa che associa il nome della specie al Pokémon corrispondente
@@ -35,7 +35,6 @@ public class PokemonFactory {
         bulbasaur.addLearnableMove(20, createMove("PoisonPowder"));
         bulbasaur.addLearnableMove(27, createMove("Razor Leaf"));
         bulbasaur.addLearnableMove(34, createMove("Growth"));
-        bulbasaur.addLearnableMove(41, createMove("Sleep Powder"));
         bulbasaur.addLearnableMove(48, createMove("SolarBeam"));
         bulbasaur.setEvolutionInfo("Ivysaur", 16);
         pokemonTemplates.put("Bulbasaur", bulbasaur);
@@ -51,7 +50,6 @@ public class PokemonFactory {
         ivysaur.addLearnableMove(1, createMove("Leech Seed"));
         ivysaur.addLearnableMove(1, createMove("Vine Whip"));
         ivysaur.addLearnableMove(22, createMove("Razor Leaf"));
-        ivysaur.addLearnableMove(30, createMove("Sleep Powder"));
         ivysaur.setEvolutionInfo("Venusaur", 32);
         pokemonTemplates.put("Ivysaur", ivysaur);
 
@@ -149,42 +147,6 @@ public class PokemonFactory {
         blastoise.addLearnableMove(42, createMove("Hydro Pump"));
         pokemonTemplates.put("Blastoise", blastoise);
 
-        // Darkrai (Dazio)
-        PokemonTemplate darkrai = new PokemonTemplate(
-            "Dazio", "Darkrai", 
-            70, 90, 90, 135, 125, // HP, Atk, Def, Spc, Spd
-            PokemonType.GHOST, null
-        );
-        darkrai.addLearnableMove(1, createMove("Night Shade"));
-        darkrai.addLearnableMove(1, createMove("Confuse Ray"));
-        darkrai.addLearnableMove(20, createMove("Dream Eater"));
-        darkrai.addLearnableMove(40, createMove("Hypnosis"));
-        pokemonTemplates.put("Darkrai", darkrai);
-
-        // Shellos (Silvia)
-        PokemonTemplate shellos = new PokemonTemplate(
-            "Silvia", "Shellos", 
-            76, 48, 48, 57, 34, // HP, Atk, Def, Spc, Spd
-            PokemonType.WATER, null
-        );
-        shellos.addLearnableMove(1, createMove("Mud Slap"));
-        shellos.addLearnableMove(5, createMove("Water Gun"));
-        shellos.addLearnableMove(15, createMove("Mud Bomb"));
-        shellos.setEvolutionInfo("Gastrodon", 30);
-        pokemonTemplates.put("Shellos", shellos);
-
-        // Gastrodon (Gustavo)
-        PokemonTemplate gastrodon = new PokemonTemplate(
-            "Gustavo", "Gastrodon", 
-            111, 83, 68, 92, 39, // HP, Atk, Def, Spc, Spd
-            PokemonType.WATER, PokemonType.GROUND
-        );
-        gastrodon.addLearnableMove(1, createMove("Mud Slap"));
-        gastrodon.addLearnableMove(1, createMove("Water Gun"));
-        gastrodon.addLearnableMove(1, createMove("Mud Bomb"));
-        gastrodon.addLearnableMove(35, createMove("Water Pulse"));
-        pokemonTemplates.put("Gastrodon", gastrodon);
-
         // Magikarp (Martina)
         PokemonTemplate magikarp = new PokemonTemplate(
             "Martina", "Magikarp", 
@@ -244,13 +206,11 @@ public class PokemonFactory {
     
     /**
      * Crea una mossa con i parametri specificati
-     * Questo è un metodo di supporto per semplificare la creazione delle mosse
      * 
      * @param name Nome della mossa
      * @return Mossa creata
      */
     private static Move createMove(String name) {
-        // Implementazione semplificata per le mosse di base
         switch (name) {
             case "Growl":
                 return new Move("Growl", PokemonType.NORMAL, Move.MoveCategory.STATUS, 0, 100, 40, 
@@ -285,9 +245,6 @@ public class PokemonFactory {
             case "Razor Leaf":
                 return new Move("Razor Leaf", PokemonType.GRASS, Move.MoveCategory.PHYSICAL, 55, 95, 25, 
                                "Lancia foglie affilate con alta probabilità di colpo critico", Move.MoveEffect.HIGH_CRITICAL, 0);
-            case "Sleep Powder":
-                return new Move("Sleep Powder", PokemonType.GRASS, Move.MoveCategory.STATUS, 0, 75, 15, 
-                               "Sparge una polvere che induce il sonno");
             case "Solar Beam":
                 return new Move("Solar Beam", PokemonType.GRASS, Move.MoveCategory.SPECIAL, 120, 100, 10, 
                                "Potente raggio di energia solare");
@@ -310,17 +267,11 @@ public class PokemonFactory {
                 return new Move("Hydro Pump", PokemonType.WATER, Move.MoveCategory.SPECIAL, 110, 80, 5, 
                                "Potente getto d'acqua ad alta pressione");
             case "Night Shade":
-                return new Move("Night Shade", PokemonType.GHOST, Move.MoveCategory.SPECIAL, 0, 100, 15, 
+                return new Move("Night Shade", PokemonType.GHOST, Move.MoveCategory.SPECIAL, 1, 100, 15, 
                                "Infligge danni pari al livello dell'utilizzatore");
             case "Confuse Ray":
-                return new Move("Confuse Ray", PokemonType.GHOST, Move.MoveCategory.STATUS, 0, 100, 10, 
+                return new Move("Confuse Ray", PokemonType.GHOST, Move.MoveCategory.SPECIAL, 50, 100, 10, 
                                "Raggio che confonde l'avversario");
-            case "Dream Eater":
-                return new Move("Dream Eater", PokemonType.PSYCHIC, Move.MoveCategory.SPECIAL, 100, 100, 15, 
-                               "Assorbe HP da un avversario addormentato");
-            case "Hypnosis":
-                return new Move("Hypnosis", PokemonType.PSYCHIC, Move.MoveCategory.STATUS, 0, 60, 20, 
-                               "Ipnotizza l'avversario facendolo addormentare");
             case "Mud Slap":
                 return new Move("Mud Slap", PokemonType.GROUND, Move.MoveCategory.SPECIAL, 20, 100, 10, 
                                "Lancia fango che riduce la precisione", Move.MoveEffect.ACCURACY_DOWN, 100);
@@ -334,7 +285,7 @@ public class PokemonFactory {
                 return new Move("Splash", PokemonType.NORMAL, Move.MoveCategory.STATUS, 0, 100, 40, 
                                "Non ha alcun effetto");
             case "Dragon Rage":
-                return new Move("Dragon Rage", PokemonType.DRAGON, Move.MoveCategory.SPECIAL, 0, 100, 10, 
+                return new Move("Dragon Rage", PokemonType.DRAGON, Move.MoveCategory.SPECIAL, 1, 100, 10, 
                                "Infligge sempre 40 HP di danno");
             case "Transform":
                 return new Move("Transform", PokemonType.NORMAL, Move.MoveCategory.STATUS, 0, 100, 10, 
@@ -390,6 +341,22 @@ public class PokemonFactory {
      */
     public static List<String> getAllSpecies() {
         return new ArrayList<>(pokemonTemplates.keySet());
+    }
+    
+    /**
+     * Ottiene la lista delle mosse apprendibili per una certa specie a un certo livello
+     * 
+     * @param species Specie del Pokémon (es. "Bulbasaur", "Charmander")
+     * @param level Livello del Pokémon
+     * @return Lista di mosse apprendibili a quel livello
+     */
+    public static List<Move> getLearnableMovesForLevel(String species, int level) {
+        PokemonTemplate template = pokemonTemplates.get(species);
+        if (template == null) {
+            return null;
+        }
+        
+        return template.getLearnableMovesForLevel(level);
     }
     
     /**
@@ -458,6 +425,10 @@ public class PokemonFactory {
          * @return Nuovo Pokémon
          */
         public Pokemon createPokemon(int level) {
+            if (level < 1) {
+                level = 1; // Non si possono creare Pokémon a livello negativo
+            }
+
             Pokemon pokemon = new Pokemon(name, species, level, baseHp, baseAttack, baseDefense, 
                                         baseSpecial, baseSpeed, primaryType, secondaryType);
             
@@ -470,15 +441,24 @@ public class PokemonFactory {
             for (int i = 1; i <= level; i++) {
                 if (learnableMoves.containsKey(i)) {
                     for (Move move : learnableMoves.get(i)) {
-                        // Se il Pokémon ha già 4 mosse, sostituisce la prima
-                        if (!pokemon.addMove(move) && !pokemon.getMoves().isEmpty()) {
-                            pokemon.replaceMove(0, move);
+                        if (pokemon.getMoves().size() < 4) {
+                            pokemon.addMove(move);
                         }
                     }
                 }
             }
             
             return pokemon;
+        }
+        
+        /**
+         * Ottiene la lista delle mosse apprendibili per questo template a un certo livello
+         * 
+         * @param level Livello del Pokémon
+         * @return Lista di mosse apprendibili a quel livello
+         */
+        public List<Move> getLearnableMovesForLevel(int level) {
+            return learnableMoves.getOrDefault(level, new ArrayList<>());
         }
     }
 }

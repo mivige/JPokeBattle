@@ -6,6 +6,7 @@ import java.util.Random;
 
 import it.pokebattle.model.Move;
 import it.pokebattle.model.Pokemon;
+import it.pokebattle.model.PokemonFactory;
 import it.pokebattle.model.PokemonType;
 import it.pokebattle.game.GameState;
 
@@ -24,7 +25,7 @@ public class Battle {
     private Pokemon enemyPokemon; // Pokémon attualmente in campo dell'avversario
     private List<Pokemon> playerTeam; // Squadra completa del giocatore
     private List<Pokemon> enemyTeam; // Squadra completa dell'avversario
-    private List<BattleListener> listeners; // Ascoltatori degli eventi di battaglia
+    private List<BattleListener> listeners; // Listeners degli eventi di battaglia
     private Random random; // Generatore di numeri casuali
     private boolean battleEnded; // Flag che indica se la battaglia è terminata
     private boolean playerWon; // Flag che indica se il giocatore ha vinto
@@ -60,9 +61,9 @@ public class Battle {
     }
     
     /**
-     * Aggiunge un ascoltatore degli eventi di battaglia
-     * 
-     * @param listener Ascoltatore da aggiungere
+     * Aggiunge un listener degli eventi di battaglia
+     *
+     * @param listener Listener da aggiungere
      */
     public void addBattleListener(BattleListener listener) {
         if (listener != null) {
@@ -71,9 +72,9 @@ public class Battle {
     }
     
     /**
-     * Rimuove un ascoltatore degli eventi di battaglia
-     * 
-     * @param listener Ascoltatore da rimuovere
+     * Rimuove un listener degli eventi di battaglia
+     *
+     * @param listener Listener da rimuovere
      */
     public void removeBattleListener(BattleListener listener) {
         listeners.remove(listener);
@@ -97,6 +98,7 @@ public class Battle {
         
         Move playerMove = playerPokemon.getMoves().get(moveIndex);
         
+        // Sceglie se l'NPC avversario deve cambiare Pokémon
         int switchIndex = enemyAIStrategy.chooseSwitch(enemyPokemon, playerPokemon, enemyTeam);
         if (switchIndex != -1) {
             Pokemon oldPokemon = enemyPokemon;
@@ -118,6 +120,13 @@ public class Battle {
             if (m.getCurrentPp() > 0) availableMoves.add(m);
         }
         int enemyMoveIndex = enemyAIStrategy.chooseMove(enemyPokemon, playerPokemon, availableMoves);
+        if (enemyMoveIndex == -1) {
+            // Nessuna mossa disponibile, il turno dell'avversario viene saltato ma il giocatore può comunque attaccare
+            executeMove(playerPokemon, enemyPokemon, playerMove, true);
+
+            checkBattleEnd();
+            return !battleEnded;
+        }
         Move enemyMove = availableMoves.get(enemyMoveIndex);
 
         // Determina chi attacca per primo in base alla velocità e alla priorità delle mosse
@@ -186,9 +195,17 @@ public class Battle {
         
         // L'avversario attacca dopo il cambio solo se il cambio non è dovuto a un KO
         if (!oldPokemon.isKO()) {
-            List<Move> enemyMoves = enemyPokemon.getMoves();
-            Move enemyMove = enemyMoves.get(random.nextInt(enemyMoves.size()));
-            executeMove(enemyPokemon, playerPokemon, enemyMove, false);
+            // Scegli la mossa dell'avversario
+            List<Move> availableMoves = new ArrayList<>();
+            for (Move m : enemyPokemon.getMoves()) {
+                if (m.getCurrentPp() > 0) availableMoves.add(m);
+            }
+            if (!availableMoves.isEmpty()) {
+                int enemyMoveIndex = enemyAIStrategy.chooseMove(enemyPokemon, playerPokemon, availableMoves);
+                Move enemyMove = availableMoves.get(enemyMoveIndex);
+                executeMove(enemyPokemon, playerPokemon, enemyMove, false);
+            }
+            // Se non ci sono mosse disponibili, il turno dell'avversario viene saltato
         }
         
         // Controlla se la battaglia è terminata
@@ -257,6 +274,65 @@ public class Battle {
             return;
         }
         
+        if (move.getName().equals("Metronome")) {
+            // Metronome sceglie una mossa casuale
+            Move randomMove = PokemonFactory.getLearnableMovesForLevel(attacker.getSpecies(), attacker.getLevel())
+                .get(random.nextInt(PokemonFactory.getLearnableMovesForLevel(attacker.getSpecies(), attacker.getLevel()).size()));
+            executeMove(attacker, defender, randomMove, isPlayer);
+            return;
+        }
+
+        if (move.getName().equals("Leech Seed")) {
+            // Danno: 1/8 degli HP massimi del difensore
+            int leechDamage = Math.max(1, defender.getMaxHp() / 8);
+            boolean fainted = !defender.takeDamage(leechDamage);
+            attacker.heal(leechDamage); // Cura l'attaccante della stessa quantità
+
+            // Notifica il danno inflitto
+            for (BattleListener listener : listeners) {
+                listener.onDamageDealt(attacker, defender, move, leechDamage,
+                                      RESULT_NORMAL, false, fainted, isPlayer);
+            }
+            if (fainted) {
+                handleFaintedPokemon(defender, isPlayer);
+            }
+            return; // Non eseguire altro per questa mossa
+        }
+
+        if (move.getName().equals("Transform")) {
+            // Solo se l'attaccante è Ditto
+            if (attacker.getSpecies().equals("Ditto")) {
+                // Crea una copia temporanea del difensore
+                Pokemon transformed = new Pokemon(
+                    attacker.getName(),
+                    defender.getSpecies(),
+                    attacker.getLevel(),
+                    defender.getBaseHp(),
+                    defender.getBaseAttack(),
+                    defender.getBaseDefense(),
+                    defender.getBaseSpecial(),
+                    defender.getBaseSpeed(),
+                    defender.getPrimaryType(),
+                    defender.getSecondaryType()
+                );
+                // Copia le mosse del difensore
+                transformed.setMoves(defender.getMoves());
+                // Mantieni gli HP attuali di Ditto
+                transformed.setCurrentHp(attacker.getCurrentHp());
+                // Sostituisci solo il riferimento in campo, NON nella squadra
+                if (isPlayer) {
+                    this.playerPokemon = transformed;
+                } else {
+                    this.enemyPokemon = transformed;
+                }
+                // Notifica la trasformazione (opzionale)
+                for (BattleListener listener : listeners) {
+                    listener.onPokemonSwitched(attacker, transformed, isPlayer);
+                }
+            }
+            return; // Non eseguire altro per questa mossa
+        }
+
         // Se è una mossa di danno, calcola e applica il danno
         if (move.getPower() > 0) {
             // Calcola il danno
@@ -299,7 +375,40 @@ public class Battle {
             }
         }
         
-        // Gestisci gli effetti della mossa (per ora solo mosse di danno)
+        // Gestisci gli effetti della mossa (oltre al danno)
+        if (move.getEffect() != Move.MoveEffect.NONE && move.effectActivates()) {
+            switch (move.getEffect()) {
+                case ATTACK_UP:
+                    attacker.increaseStat(Pokemon.Stat.ATTACK, 1);
+                    break;
+                case ATTACK_DOWN:
+                    defender.decreaseStat(Pokemon.Stat.ATTACK, 1);
+                    break;
+                case DEFENSE_UP:
+                    attacker.increaseStat(Pokemon.Stat.DEFENSE, 1);
+                    break;
+                case DEFENSE_DOWN:
+                    defender.decreaseStat(Pokemon.Stat.DEFENSE, 1);
+                    break;
+                case SPEED_UP:
+                    attacker.increaseStat(Pokemon.Stat.SPEED, 1);
+                    break;
+                case SPEED_DOWN:
+                    defender.decreaseStat(Pokemon.Stat.SPEED, 1);
+                    break;
+                case SPECIAL_UP:
+                    attacker.increaseStat(Pokemon.Stat.SPECIAL, 1);
+                    break;
+                case SPECIAL_DOWN:
+                    defender.decreaseStat(Pokemon.Stat.SPECIAL, 1);
+                    break;
+                case HEAL:
+                    attacker.healSomeHp();
+                    break;
+                default:
+                    break;
+            }
+        }
     }
     
     /**
@@ -336,7 +445,7 @@ public class Battle {
         // Calcola il danno base
         double baseDamage = ((2.0 * level / 5.0 + 2.0) * power * attack / defense / 50.0 + 2.0);
         
-        // Calcola il modificatore di tipo (STAB - Same Type Attack Bonus)
+        // Calcola il modificatore di tipo (STAB = Same Type Attack Bonus)
         double stab = 1.0;
         if (move.getType() == attacker.getPrimaryType() || 
             (attacker.getSecondaryType() != null && move.getType() == attacker.getSecondaryType())) {
@@ -353,6 +462,14 @@ public class Battle {
         // Calcola il danno finale
         int finalDamage = (int) (baseDamage * stab * typeEffectiveness * randomFactor);
         
+        if (move.getName().equals("Dragon Rage")) {
+            // Dragon Rage infligge sempre 40 danni fissi
+            finalDamage = 40;
+        } else if (move.getName().equals("Night Shade")) {
+            // Night Shade infligge danni pari al livello del Pokémon
+            finalDamage = attacker.getLevel();
+        }
+
         // Assicura che il danno sia almeno 1 (a meno che la mossa non abbia effetto)
         return (finalDamage > 0 && typeEffectiveness > 0) ? Math.max(1, finalDamage) : 0;
     }
@@ -386,7 +503,7 @@ public class Battle {
                 playerWon = false;
             }
             // Altrimenti, il giocatore deve scegliere un nuovo Pokémon
-            // La scelta verrà gestita dall'interfaccia utente
+            // La scelta viene gestita dall'interfaccia utente
         }
         // Se il Pokémon KO è dell'avversario
         else if (faintedPokemon == enemyPokemon) {
@@ -394,8 +511,8 @@ public class Battle {
             int expGained = calculateExperienceGain(enemyPokemon);
             playerPokemon.addExperience(expGained);
 
-            // Sblocca la specie del Pokémon sconfitto per le partite future (1 possibilità su 3)
-            if (random.nextInt(3) == 1) {
+            // Sblocca la specie del Pokémon sconfitto per le partite future (1 possibilità su 10)
+            if (random.nextInt(10) == 1) {
                 GameState.getInstance().unlockDefeatedPokemon(faintedPokemon);
             }
             
@@ -433,7 +550,7 @@ public class Battle {
      */
     private int calculateExperienceGain(Pokemon defeatedPokemon) {
         // Formula semplificata: (livello del Pokémon sconfitto) * 3
-        return defeatedPokemon.getLevel() * 30;
+        return defeatedPokemon.getLevel() * 3;
     }
     
     /**

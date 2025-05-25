@@ -5,7 +5,7 @@ import it.pokebattle.battle.*;
 import java.util.*;
 
 public class TestBattle {
-    public static final int NUM_TESTS = 4;
+    public static final int NUM_TESTS = 5;
 
     public static int runTests() {
         int passed = 0, total = 0;
@@ -42,7 +42,7 @@ public class TestBattle {
             System.out.println("TestBattle: addBattleListener/getListeners - FAILED");
         }
 
-        // Test esecuzione mossa (non crasha)
+        // Test esecuzione mossa
         total++;
         try {
             b.executePlayerMove(0);
@@ -70,6 +70,24 @@ public class TestBattle {
             passed++;
         } catch (Exception e) {
             System.out.println("TestBattle: mossa non valida - FAILED");
+        }
+
+        // Test: Nessuna mossa disponibile per l'avversario (il turno viene saltato)
+        total++;
+        Pokemon pA = new Pokemon("A", "Bulbasaur", 5, 1, 49, 49, 65, 45, PokemonType.GRASS, PokemonType.POISON);
+        Pokemon pB = new Pokemon("B", "Charmander", 5, 39, 52, 43, 50, 65, PokemonType.FIRE, null);
+        Move m = new Move("Tackle", PokemonType.NORMAL, Move.MoveCategory.PHYSICAL, 40, 100, 1, "Un attacco fisico di base", Move.MoveEffect.NONE, 0);
+        pA.addMove(m);
+        pB.addMove(m);
+        Battle bNoMoves = new Battle(List.of(pA), List.of(pB));
+        // Esaurisci i PP di tutte le mosse dell'avversario
+        while (pB.getMoves().get(0).getCurrentPp() > 0) pB.getMoves().get(0).use();
+        boolean result = bNoMoves.executePlayerMove(0); // Se l'avversario attaccasse la battaglia terminerebbe perché pA ha 1 PS
+        if (result) {
+            System.out.println("TestBattle: Nessuna mossa disponibile avversario - PASSED");
+            passed++;
+        } else {
+            System.out.println("TestBattle: Nessuna mossa disponibile avversario - FAILED");
         }
 
         return passed;
