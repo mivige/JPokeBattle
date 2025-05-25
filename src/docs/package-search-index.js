@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"it.pokebattle.battle"},{"l":"it.pokebattle.game"},{"l":"it.pokebattle.model"},{"l":"it.pokebattle.ui"},{"l":"test"}];updateSearchResults();
